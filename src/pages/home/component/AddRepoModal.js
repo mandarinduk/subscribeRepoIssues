@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Input, Typography } from 'antd';
 import PropTypes from 'prop-types';
 
-export default function AddRepoModal({
+function AddRepoModal({
   isModalVisable,
   handleAddRepo,
   handleCloseModal,
@@ -50,6 +50,8 @@ AddRepoModal.propTypes = {
   isModalVisable: PropTypes.bool.isRequired,
   handleAddRepo: PropTypes.func.isRequired,
   handleCloseModal: PropTypes.func.isRequired,
-  repoFullName: PropTypes.objectOf(PropTypes.object).isRequired,
+  repoFullName: PropTypes.objectOf(PropTypes.string).isRequired,
   setRepoFullName: PropTypes.func.isRequired,
 };
+
+export default React.memo(AddRepoModal);

@@ -4,7 +4,9 @@ import PropTypes from 'prop-types';
 import { Card } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 
-export default function RepoCard({ setRepoList, repoName, issueCount }) {
+function RepoCard({ setRepoList, repoName, issueCount }) {
+  const detailPageUrl = `detail/${repoName}`;
+
   const deleteRepo = name => {
     const repos = JSON.parse(localStorage.getItem('repos'));
     const filteredList = repos.filter(repo => {
@@ -20,7 +22,7 @@ export default function RepoCard({ setRepoList, repoName, issueCount }) {
       size="small"
       title={repoName}
       extra={
-        <Link to="www.naver.com" style={{ color: '#1890ff' }}>
+        <Link to={detailPageUrl} style={{ color: '#1890ff' }}>
           View Details
         </Link>
       }
@@ -39,3 +41,5 @@ RepoCard.propTypes = {
   repoName: PropTypes.string.isRequired,
   issueCount: PropTypes.number.isRequired,
 };
+
+export default React.memo(RepoCard);
