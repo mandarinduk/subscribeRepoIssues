@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { message, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -33,17 +33,16 @@ const Add = styled.div`
 export default function Home() {
   const [repoList, setRepoList] = useState([]);
   const [isModalVisable, setIsModalVisable] = useState(false);
-  const [repoFullName, setRepoFullName] = useState({
-    ...INITIAL_REPO_NAME_STATE,
-  });
+  const [repoFullName, setRepoFullName] = useState(INITIAL_REPO_NAME_STATE);
   const { Title, Text } = Typography;
 
   useEffect(() => {
     const repos = JSON.parse(localStorage.getItem('repos'));
-    if (repos) setRepoList(repos);
+    if (!repos) localStorage.setItem('repos', '[]');
+    else setRepoList(repos);
   }, []);
 
-  const handleAddRepo = () => {
+  const handleAddRepo = useCallback(() => {
     const { ownerName, repoName } = repoFullName;
     const hasRepo =
       repoList.length &&
@@ -54,12 +53,12 @@ export default function Home() {
     setIsModalVisable(!isModalVisable);
     if (hasRepo) {
       message.error('이미 등록된 Repository입니다.');
-      setRepoFullName({ ...INITIAL_REPO_NAME_STATE });
+      setRepoFullName(INITIAL_REPO_NAME_STATE);
       return;
     }
     fetchRepo(repoFullName).then(repos => setRepoList(repos));
-    setRepoFullName({ ...INITIAL_REPO_NAME_STATE });
-  };
+    setRepoFullName(INITIAL_REPO_NAME_STATE);
+  }, [repoFullName]);
 
   const handleOpenModal = () => {
     const isMax = repoList.length === MAX_REPO_COUNT;
@@ -70,10 +69,10 @@ export default function Home() {
     setIsModalVisable(!isModalVisable);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalVisable(!isModalVisable);
-    setRepoFullName({ ...INITIAL_REPO_NAME_STATE });
-  };
+    setRepoFullName(INITIAL_REPO_NAME_STATE);
+  }, [isModalVisable]);
 
   return (
     <HomeWrapper>

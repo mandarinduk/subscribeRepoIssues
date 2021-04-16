@@ -8,8 +8,8 @@ export default async function fetchRepo(repo) {
     const {
       data: { full_name: name, open_issues_count: issueCount },
     } = await octokit.request(`GET ${url}`);
-    const repos = JSON.parse(localStorage.getItem('repos'));
 
+    const repos = JSON.parse(localStorage.getItem('repos'));
     localStorage.setItem(
       'repos',
       JSON.stringify(
@@ -17,7 +17,10 @@ export default async function fetchRepo(repo) {
       ),
     );
   } catch (e) {
-    message.error('입력하신 값과 일치하는 저장소가 없습니다.');
+    console.warn(e);
+    message.error(
+      `입력하신 저장소 => ${repo.ownerName}/${repo.repoName} 와 일치하는 저장소가 없습니다.`,
+    );
   }
   return JSON.parse(localStorage.getItem('repos'));
 }
