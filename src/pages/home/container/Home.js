@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { message, Typography } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -9,6 +9,7 @@ import {
   MAX_REPO_COUNT,
   INITIAL_REPO_NAME_STATE,
 } from '../../../common/constant';
+import useFetchRepo from '../../../common/hook/useFetchRepo';
 
 const HomeWrapper = styled.div`
   margin-top: 100px;
@@ -31,16 +32,10 @@ const Add = styled.div`
 `;
 
 export default function Home() {
-  const [repoList, setRepoList] = useState([]);
+  const [repoList, setRepoList] = useFetchRepo();
   const [isModalVisable, setIsModalVisable] = useState(false);
   const [repoFullName, setRepoFullName] = useState(INITIAL_REPO_NAME_STATE);
   const { Title, Text } = Typography;
-
-  useEffect(() => {
-    const repos = JSON.parse(localStorage.getItem('repos'));
-    if (!repos) localStorage.setItem('repos', '[]');
-    else setRepoList(repos);
-  }, []);
 
   const handleAddRepo = useCallback(() => {
     const { ownerName, repoName } = repoFullName;
@@ -74,6 +69,19 @@ export default function Home() {
     setRepoFullName(INITIAL_REPO_NAME_STATE);
   }, [isModalVisable]);
 
+  const deleteRepo = useCallback(
+    name => {
+      const repos = JSON.parse(localStorage.getItem('repos'));
+      const filteredList = repos.filter(repo => {
+        return repo.name !== name;
+      });
+
+      setRepoList(filteredList);
+      localStorage.setItem('repos', JSON.stringify(filteredList));
+    },
+    [repoList],
+  );
+
   return (
     <HomeWrapper>
       <Title style={{ textAlign: 'center' }}>
@@ -100,9 +108,9 @@ export default function Home() {
           repoList.map(repo => (
             <RepoCard
               key={repo.name}
-              setRepoList={setRepoList}
               repoName={repo.name}
               issueCount={repo.issueCount}
+              deleteRepo={deleteRepo}
             />
           ))
         ) : (

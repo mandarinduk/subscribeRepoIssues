@@ -1,20 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Octokit } from '@octokit/core';
+import { fetchIssue } from '../util/fetch';
 
 export default function useFetchIssue(repoName) {
   const [issues, setIssues] = useState([]);
-  const octokit = new Octokit();
-
-  const fetchIssue = async repo => {
-    const url = `/repos/${repo}/issues?page=1&per_page=10`;
-
-    await octokit.request(`GET ${url}`).then(res => {
-      setIssues(res.data);
-    });
-  };
 
   useEffect(() => {
-    fetchIssue(repoName);
+    fetchIssue(repoName).then(issueList => setIssues(issueList));
   }, []);
 
   return [issues, setIssues];
