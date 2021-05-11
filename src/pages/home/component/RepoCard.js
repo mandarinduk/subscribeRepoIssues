@@ -4,18 +4,8 @@ import PropTypes from 'prop-types';
 import { Card } from 'antd';
 import { DeleteOutlined } from '@ant-design/icons';
 
-function RepoCard({ setRepoList, repoName, issueCount }) {
+function RepoCard({ repoName, issueCount, deleteRepo }) {
   const detailPageUrl = `detail/${repoName}`;
-
-  const deleteRepo = name => {
-    const repos = JSON.parse(localStorage.getItem('repos'));
-    const filteredList = repos.filter(repo => {
-      return repo.name !== name;
-    });
-
-    setRepoList(filteredList);
-    localStorage.setItem('repos', JSON.stringify(filteredList));
-  };
 
   return (
     <Card
@@ -37,9 +27,9 @@ function RepoCard({ setRepoList, repoName, issueCount }) {
 }
 
 RepoCard.propTypes = {
-  setRepoList: PropTypes.func.isRequired,
   repoName: PropTypes.string.isRequired,
   issueCount: PropTypes.number.isRequired,
+  deleteRepo: PropTypes.func.isRequired,
 };
 
 export default React.memo(RepoCard);

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { Typography, List, Pagination, Skeleton } from 'antd';
-import { HomeOutlined, GithubOutlined } from '@ant-design/icons';
+import { Typography } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
 import PropTypes from 'prop-types';
-import { Octokit } from '@octokit/core';
 import useFetchIssue from '../../../common/hook/useFetchIssue';
+import { fetchIssue } from '../../../common/util/fetch';
+import IssueList from '../component/IssueList';
 
 const DetailWrapper = styled.div`
   margin-top: 100px;
@@ -36,21 +37,27 @@ export default function Detail({ match }) {
   const { Title, Text } = Typography;
   const repos = JSON.parse(localStorage.getItem('repos'));
 
-  const getTotalCount = name => {
-    const filteredList = repos.filter(repository => repository.name === name);
-    return filteredList[0].issueCount;
-  };
+  const getTotalCount = useCallback(
+    name => {
+      const filteredList = repos.filter(repository => repository.name === name);
+      return filteredList[0].issueCount;
+    },
+    [repoFullName],
+  );
 
-  const handlePagination = (page, perPage) => {
-    setIsLoading(state => !state);
-    const octokit = new Octokit();
-    const url = `/repos/${repoFullName}/issues?page=${page}&per_page=${perPage}`;
-
-    octokit.request(`GET ${url}`).then(res => {
-      setIssues(res.data);
+  const handlePagination = useCallback(
+    (page, perPage) => {
       setIsLoading(state => !state);
-    });
-  };
+
+      fetchIssue(repoFullName, page, perPage).then(res => {
+        setIssues(res);
+        setIsLoading(state => !state);
+      });
+    },
+    [repoFullName],
+  );
+
+  const totalCount = useMemo(() => getTotalCount(repoFullName), [repoFullName]);
 
   return (
     <DetailWrapper>
@@ -68,32 +75,12 @@ export default function Detail({ match }) {
             <HomeOutlined style={{ marginLeft: 8 }} />
           </Text>
         </PushHome>
-        <List
-          footer={
-            <Pagination
-              size="small"
-              total={getTotalCount(repoFullName)}
-              onChange={(page, perPage) => handlePagination(page, perPage)}
-            />
-          }
-          bordered
-          dataSource={issues}
-          renderItem={issue => (
-            <List.Item style={{ display: 'block' }}>
-              <Skeleton loading={isLoading} active paragraph={{ rows: 1 }} />
-              {!isLoading && (
-                <>
-                  <GithubOutlined style={{ marginLeft: 10, marginRight: 10 }} />
-                  <a href={issue.html_url} target="blank">
-                    <Text mark underline style={{ marginRight: 10 }}>
-                      {issue.number}
-                    </Text>
-                  </a>
-                  {issue.title}
-                </>
-              )}
-            </List.Item>
-          )}
+        <IssueList
+          repoFullName={repoFullName}
+          issues={issues}
+          isLoading={isLoading}
+          totalCount={totalCount}
+          handlePagination={handlePagination}
         />
       </IssueSection>
     </DetailWrapper>
